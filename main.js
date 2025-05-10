@@ -1,81 +1,125 @@
-//Script File
-
 class MarsWeather {
-    constructor() {
+  constructor() {
+    this.forceImgAPI = false;
+    this.forceTempAPI = false;
 
-        this.getDailyImage();
-        this.getWeather();
-    }
+    this.date = new Date();
+    this.timestamp = this.date.toDateString();
+    this.imgAPI = null;
+    this.tempAPI = null;
 
+    chrome.storage.local
+      .get(['marsImg'])
+      .then((data) => {
+        if (
+          !this.forceImgAPI &&
+          data.marsImg &&
+          data.marsImg.storeDate === this.timestamp
+        ) {
+          console.log('STORED IMG API:', data.marsImg);
+          this.imgAPI = data.marsImg.api;
+          this.imgDOM();
+        } else {
+          console.log('Img API NOT STORED');
+          this.fetchImgAPI();
+        }
+      })
+      .catch((error) => console.log(error));
 
+    chrome.storage.local
+      .get(['marsTemp'])
+      .then((data) => {
+        if (
+          !this.forceTempAPI &&
+          data.marsTemp &&
+          data.marsTemp.storeDate === this.timestamp
+        ) {
+          console.log('STORED TEMP API:', data.marsTemp);
+          this.tempAPI = data.marsTemp.api;
+          this.tempDOM();
+        } else {
+          console.log('TEMP API NOT STORED');
+          this.fetchTempAPI();
+        }
+      })
+      .catch((error) => console.log(error));
+  }
 
-    async getDailyImage() {
+  fetchImgAPI() {
+    fetch(
+      'https://api.nasa.gov/planetary/apod?api_key=tiQJub2srWoz8Gzkl7u6ILGAOeeB64nLl943LFVl'
+    )
+      .then((response) => response.json())
+      .then((jsonObj) => {
+        //Chrome Storage
+        const imgAPI = {
+          storeDate: this.timestamp,
+          api: jsonObj,
+        };
+        chrome.storage.local
+          .set({ marsImg: imgAPI })
+          .then(() => {
+            console.log('IMG API saved to Chrome Storage');
+            //Proceed with setup
+            this.imgAPI = jsonObj;
+            this.imgDOM();
+          })
+          .catch((err) => console.error(err));
+      })
+      .catch((err) => console.error(err));
+  }
 
-        fetch('https://api.nasa.gov/planetary/apod?api_key=tiQJub2srWoz8Gzkl7u6ILGAOeeB64nLl943LFVl')
-        .then(response => response.json())
-        .then(jsonObj => {
+  imgDOM() {
+    this.dailyImgURL = this.imgAPI.hdurl;
+    const element = document.querySelector('#daily_image');
+    element.setAttribute('src', this.dailyImgURL);
+    console.log("Today's image URL: ", this.dailyImgURL);
+  }
 
-            this.dailyImageURL = jsonObj.hdurl;
-            console.log(this.dailyImageURL);
-            const element = document.querySelector('#daily_image');
-            element.setAttribute('src', this.dailyImageURL);
-        })
-        .catch(err => console.error(err));
-    }
+  getFarenheit(degreesInC) {
+    return Math.round((degreesInC * 9) / 5 + 32);
+  }
 
-    // "AT": { "av": -71.233, "ct": 326642, "mn": -101.024, "mx": -27.149 }, ### Atmospheric temperature data for Sol 259
+  fetchTempAPI() {
+    fetch(
+      'https://mars.nasa.gov/rss/api/?feed=weather&category=msl&feedtype=json'
+    )
+      .then((response) => response.json())
+      .then((jsonObj) => {
+        //Chrome Storage
+        const tempAPI = {
+          storeDate: this.timestamp,
+          api: jsonObj,
+        };
+        chrome.storage.local
+          .set({ marsTemp: tempAPI })
+          .then(() => {
+            console.log('TEMP API saved to Chrome Storage');
+            //Proceed with setup
+            this.tempAPI = jsonObj;
+            this.tempDOM();
+          })
+          .catch((err) => console.error(err));
+      })
+      .catch((err) => console.error(err));
+  }
 
-    //figure out the SOL of Mars based on todays date on Earth
+  tempDOM() {
+    this.mostRecent = this.tempAPI.soles[0];
+    console.log(this.mostRecent);
+    this.highF = this.getFarenheit(this.mostRecent.max_temp);
+    this.lowF = this.getFarenheit(this.mostRecent.min_temp);
+    this.mostRecentDate = new Date(
+      Date.parse(this.mostRecent['terrestrial_date'])
+    );
 
-    /*"soles": [
-        {
-          "id": "4290",
-          "terrestrial_date": "2025-05-05",
-          "sol": "4531",
-          "ls": "79",
-          "season": "Month 3",
-          "min_temp": "-80",
-          "max_temp": "-28",
-          "pressure": "821",
-          "pressure_string": "Higher",
-          "abs_humidity": "--",
-          "wind_speed": "--",
-          "wind_direction": "--",
-          "atmo_opacity": "Sunny",
-          "sunrise": "05:57",
-          "sunset": "17:40",
-          "local_uv_irradiance_index": "Moderate",
-          "min_gts_temp": "-93",
-          "max_gts_temp": "-16"
-        }, 
-        C to F (0°C × 9/5) + 32 = 32°F
-
-        soles[0][min_temp]
-        */
-       
-    getFarenheit(degreesInC) {
-        return Math.round(((degreesInC * 9/5) + 32));
-    };
-
-    async getWeather() {
-        fetch('https://mars.nasa.gov/rss/api/?feed=weather&category=msl&feedtype=json')
-        .then(response => response.json())
-        .then(jsonObj => {
-
-            this.weather = jsonObj.soles[0];
-            console.log(this.weather);
-            this.highF = this.getFarenheit(this.weather.max_temp);
-            console.log(this.highF);
-
-
-            this.date = new Date(this.weather['terrestriaL_date']);
-            console.log('today\'s date: ', this.date.toDateString());
-        })
-        .catch(err => console.error(err));
-    }
+    console.log('Most Recent Date: ', this.mostRecentDate.toDateString());
+    console.log('High Temp (F): ', this.highF);
+    console.log('Low Temp (F): ', this.lowF);
+  }
 }
 
-
 document.addEventListener('DOMContentLoaded', () => {
-    window.marsWeather = new MarsWeather();
+  //console.log('dom content loaded');
+  window.marsWeather = new MarsWeather();
 });

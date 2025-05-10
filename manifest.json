@@ -1,11 +1,12 @@
 {
-	"name": "Hackathon Extension Mars Weather",
-	"version": "1.0.0",
-	"description": "Hackathon Extension Mars Weather",
-	"manifest_version": 3,
-	"author": "Edward Alex Victoria",
-	"action": {
-		"default_popup": "index.html",
-		"default_title": "Mars Weather"
-	}
+  "name": "Hackathon Extension Mars Weather",
+  "version": "1.0.0",
+  "description": "Hackathon Extension Mars Weather",
+  "manifest_version": 3,
+  "author": "Edward Alex Victoria",
+  "permissions": ["storage"],
+  "action": {
+    "default_popup": "index.html",
+    "default_title": "Mars Weather"
+  }
 }
