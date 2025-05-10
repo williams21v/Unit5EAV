@@ -1,6 +1,6 @@
 class MarsWeather {
   constructor() {
-    this.forceImgAPI = true;
+    this.forceImgAPI = false;
     this.forceTempAPI = false;
 
     this.date = new Date();
@@ -8,7 +8,6 @@ class MarsWeather {
     this.imgAPI = null;
     this.tempAPI = null;
 
-   
     chrome.storage.local
       .get(['marsTemp'])
       .then((data) => {
@@ -29,13 +28,15 @@ class MarsWeather {
   }
 
   fetchImgAPI() {
-    // fetch(
-    //   'https://api.nasa.gov/planetary/apod?api_key=tiQJub2srWoz8Gzkl7u6ILGAOeeB64nLl943LFVl'
-    // )
-      fetch(`https://api.nasa.gov/mars-photos/api/v1/rovers/curiosity/photos?sol=${this.mostRecent.sol}&api_key=tiQJub2srWoz8Gzkl7u6ILGAOeeB64nLl943LFVl`)
-          //https://api.nasa.gov/mars-photos/api/v1/rovers/curiosity/photos?sol=4531&api_key=tiQJub2srWoz8Gzkl7u6ILGAOeeB64nLl943LFVl
+    const imgAPI = `https://api.nasa.gov/mars-photos/api/v1/rovers/curiosity/photos?sol=${this.mostRecent.sol}&api_key=tiQJub2srWoz8Gzkl7u6ILGAOeeB64nLl943LFVl`;
+
+    console.log('imgAPI: ', imgAPI);
+    console.log('this is accurate: ', this);
+
+    fetch(imgAPI)
       .then((response) => response.json())
       .then((jsonObj) => {
+        console.log(jsonObj);
         //Chrome Storage
         const imgAPI = {
           storeDate: this.timestamp,
@@ -55,10 +56,13 @@ class MarsWeather {
   }
 
   imgDOM() {
-    this.dailyImgURL = this.imgAPI.hdurl;
+    const randomIndex = Math.floor(Math.random() * this.imgAPI.photos.length);
+    console.log('random index: ', randomIndex);
+    console.log('this okay: ', this);
+    this.imgURL = this.imgAPI.photos[randomIndex].img_src;
     const element = document.querySelector('#daily_image');
-    element.setAttribute('src', this.dailyImgURL);
-    console.log("Today's image URL: ", this.dailyImgURL);
+    element.setAttribute('src', this.imgURL);
+    console.log("Today's image URL: ", this.imgURL);
   }
 
   getFarenheit(degreesInC) {
@@ -102,14 +106,21 @@ class MarsWeather {
     console.log('High Temp (F): ', this.highF);
     console.log('Low Temp (F): ', this.lowF);
 
-    document.querySelector('#min_temp').textContent = `Min Temp: ${this.lowF}°F`;
-    document.querySelector('#max_temp').textContent = `Max Temp: ${this.highF}°F`;
-    document.querySelector('#sol_number').textContent = `Sol: ${this.mostRecent.sol}`;
-    document.querySelector('#terrestrial_date').textContent = `Terrestrial Date: ${this.mostRecentDate.toDateString()}`;
+    document.querySelector(
+      '#min_temp'
+    ).textContent = `Min Temp: ${this.lowF}°F`;
+    document.querySelector(
+      '#max_temp'
+    ).textContent = `Max Temp: ${this.highF}°F`;
+    document.querySelector(
+      '#sol_number'
+    ).textContent = `Sol: ${this.mostRecent.sol}`;
+    document.querySelector(
+      '#terrestrial_date'
+    ).textContent = `Terrestrial Date: ${this.mostRecentDate.toDateString()}`;
 
-    const newThis = this;
-//image fetching starting here
-     chrome.storage.local
+    //image fetching starting here
+    chrome.storage.local
       .get(['marsImg'])
       .then((data) => {
         if (
@@ -122,11 +133,10 @@ class MarsWeather {
           this.imgDOM();
         } else {
           console.log('Img API NOT STORED');
-          this.fetchImgAPI().bind(newThis);
+          this.fetchImgAPI();
         }
       })
       .catch((error) => console.log(error));
-
   }
 }
 
