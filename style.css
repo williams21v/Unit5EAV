@@ -1,4 +1,91 @@
+body {
+  padding: 0;
+  margin: 0;
+  width: 370px;
+  background-color: #f7f9ff;
+}
+body.dark {
+  background-color: #282828;
+  color: white;
+}
 #daily_image {
-    display: block;
-    width: 300px;
+  display: block;
+  height: 287px;
+  object-fit: cover;
+  width: 100%;
+}
+#mw-heading-row {
+  padding: 16px 20px;
+}
+#mw-heading-row h1 {
+  margin: 0;
+  font-size: 1.05rem;
+}
+#mw-body h2,
+#mw-body p {
+  margin: 0;
+  display: inline-block;
+}
+
+#mw-img-caption {
+  padding: 11px 20px;
+  padding-bottom: 0;
+  margin: 0;
+  font-style: italic;
+  font-size: 0.8rem;
+  line-height: 1.4;
+}
+
+#mw-body {
+  padding: 30px 20px;
+}
+#mw-temp-tile {
+  width: 58%;
+  margin: 0 auto;
+  padding: 20px;
+  background-color: rgba(0, 0, 0, 0.06);
+  border-radius: 10px;
+  text-align: center;
+  box-shadow: 1px 1px 1px 0px rgba(0, 0, 0, 0.13);
+}
+.dark #mw-temp-tile {
+  background-color: rgba(0, 0, 0, 0.2);
+}
+#mw-temp-tile h2 {
+  font-size: 1.45rem;
+  line-height: 1.26;
+}
+#terrestrial_date {
+  font-size: 0.55em;
+  font-weight: 500;
+}
+#mw-temp-tile h2 span {
+  display: block;
+}
+#mw-divider {
+  height: 3px;
+  background-color: rgba(0, 64, 255, 0.6);
+  width: 90%;
+  margin: 14px auto;
+  box-shadow: 1px 1px 1px 0px rgba(0, 0, 0, 0.13);
+}
+.dark #mw-divider {
+  background-color: rgba(255, 255, 255, 0.5);
+}
+#mw-temp-tile h3 {
+  font-size: 1.05rem;
+  display: inline-block;
+  margin: 0;
+  margin-right: 5px;
+}
+h3#mw-low {
+  margin-left: 10px;
+}
+#mw-temp-tile h3 span {
+  display: inline-block;
+}
+#mw-temp-tile h3 + p {
+  margin: 0;
+  font-size: 1.2em;
+  font-weight: 500;
 }

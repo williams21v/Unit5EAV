@@ -59,10 +59,17 @@ class MarsWeather {
     const randomIndex = Math.floor(Math.random() * this.imgAPI.photos.length);
     console.log('random index: ', randomIndex);
     console.log('this okay: ', this);
-    this.imgURL = this.imgAPI.photos[randomIndex].img_src;
+    this.img = this.imgAPI.photos[randomIndex];
+    this.imgURL = this.img.img_src;
     const element = document.querySelector('#daily_image');
     element.setAttribute('src', this.imgURL);
     console.log("Today's image URL: ", this.imgURL);
+    const caption = document.querySelector('#mw-img-caption');
+    caption.textContent = `Caption: Image captured by camera ${
+      this.img.camera.name
+    } aboard the ${this.img.rover.name} rover on Sol ${
+      this.img.sol
+    }. (Earth Date: ${this.mostRecentDate.toDateString()})`;
   }
 
   getFarenheit(degreesInC) {
@@ -99,25 +106,21 @@ class MarsWeather {
     this.highF = this.getFarenheit(this.mostRecent.max_temp);
     this.lowF = this.getFarenheit(this.mostRecent.min_temp);
     this.mostRecentDate = new Date(
-      Date.parse(this.mostRecent['terrestrial_date'])
+      Date.parse(this.mostRecent['terrestrial_date'] + 'T00:00:00')
     );
 
     console.log('Most Recent Date: ', this.mostRecentDate.toDateString());
     console.log('High Temp (F): ', this.highF);
     console.log('Low Temp (F): ', this.lowF);
 
-    document.querySelector(
-      '#min_temp'
-    ).textContent = `Min Temp: ${this.lowF}°F`;
-    document.querySelector(
-      '#max_temp'
-    ).textContent = `Max Temp: ${this.highF}°F`;
+    document.querySelector('#min_temp').textContent = `${this.lowF}°F`;
+    document.querySelector('#max_temp').textContent = `${this.highF}°F`;
     document.querySelector(
       '#sol_number'
-    ).textContent = `Sol: ${this.mostRecent.sol}`;
+    ).textContent = `Sol ${this.mostRecent.sol}`;
     document.querySelector(
       '#terrestrial_date'
-    ).textContent = `Terrestrial Date: ${this.mostRecentDate.toDateString()}`;
+    ).textContent = `${this.mostRecentDate.toDateString()}`;
 
     //image fetching starting here
     chrome.storage.local
@@ -139,6 +142,28 @@ class MarsWeather {
       .catch((error) => console.log(error));
   }
 }
+
+function themeSettings() {
+  //Dark Mode?
+  if (
+    window.matchMedia &&
+    window.matchMedia('(prefers-color-scheme: dark)').matches
+  ) {
+    document.body.classList.add('dark');
+  }
+  //Listen for Theme Change
+  window
+    .matchMedia('(prefers-color-scheme: dark)')
+    .addEventListener('change', (event) => {
+      const newColorScheme = event.matches ? 'dark' : 'light';
+      if (newColorScheme === 'dark') {
+        document.body.classList.add('dark');
+      } else {
+        document.body.classList.remove('dark');
+      }
+    });
+}
+themeSettings();
 
 document.addEventListener('DOMContentLoaded', () => {
   //console.log('dom content loaded');
