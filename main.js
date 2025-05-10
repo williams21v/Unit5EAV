@@ -116,6 +116,11 @@ class MarsWeather {
     console.log('Most Recent Date: ', this.mostRecentDate.toDateString());
     console.log('High Temp (F): ', this.highF);
     console.log('Low Temp (F): ', this.lowF);
+
+    document.querySelector('#min_temp').textContent = `Min Temp: ${this.lowF}°F`;
+    document.querySelector('#max_temp').textContent = `Max Temp: ${this.highF}°F`;
+    document.querySelector('#sol_number').textContent = `Sol: ${this.mostRecent.sol}`;
+    document.querySelector('#terrestrial_date').textContent = `Terrestrial Date: ${this.mostRecentDate.toDateString()}`;
   }
 }
 
