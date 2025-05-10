@@ -1,6 +1,6 @@
 class MarsWeather {
   constructor() {
-    this.forceImgAPI = false;
+    this.forceImgAPI = true;
     this.forceTempAPI = false;
 
     this.date = new Date();
@@ -8,24 +8,7 @@ class MarsWeather {
     this.imgAPI = null;
     this.tempAPI = null;
 
-    chrome.storage.local
-      .get(['marsImg'])
-      .then((data) => {
-        if (
-          !this.forceImgAPI &&
-          data.marsImg &&
-          data.marsImg.storeDate === this.timestamp
-        ) {
-          console.log('STORED IMG API:', data.marsImg);
-          this.imgAPI = data.marsImg.api;
-          this.imgDOM();
-        } else {
-          console.log('Img API NOT STORED');
-          this.fetchImgAPI();
-        }
-      })
-      .catch((error) => console.log(error));
-
+   
     chrome.storage.local
       .get(['marsTemp'])
       .then((data) => {
@@ -46,9 +29,11 @@ class MarsWeather {
   }
 
   fetchImgAPI() {
-    fetch(
-      'https://api.nasa.gov/planetary/apod?api_key=tiQJub2srWoz8Gzkl7u6ILGAOeeB64nLl943LFVl'
-    )
+    // fetch(
+    //   'https://api.nasa.gov/planetary/apod?api_key=tiQJub2srWoz8Gzkl7u6ILGAOeeB64nLl943LFVl'
+    // )
+      fetch(`https://api.nasa.gov/mars-photos/api/v1/rovers/curiosity/photos?sol=${this.mostRecent.sol}&api_key=tiQJub2srWoz8Gzkl7u6ILGAOeeB64nLl943LFVl`)
+          //https://api.nasa.gov/mars-photos/api/v1/rovers/curiosity/photos?sol=4531&api_key=tiQJub2srWoz8Gzkl7u6ILGAOeeB64nLl943LFVl
       .then((response) => response.json())
       .then((jsonObj) => {
         //Chrome Storage
@@ -121,6 +106,27 @@ class MarsWeather {
     document.querySelector('#max_temp').textContent = `Max Temp: ${this.highF}°F`;
     document.querySelector('#sol_number').textContent = `Sol: ${this.mostRecent.sol}`;
     document.querySelector('#terrestrial_date').textContent = `Terrestrial Date: ${this.mostRecentDate.toDateString()}`;
+
+    const newThis = this;
+//image fetching starting here
+     chrome.storage.local
+      .get(['marsImg'])
+      .then((data) => {
+        if (
+          !this.forceImgAPI &&
+          data.marsImg &&
+          data.marsImg.storeDate === this.timestamp
+        ) {
+          console.log('STORED IMG API:', data.marsImg);
+          this.imgAPI = data.marsImg.api;
+          this.imgDOM();
+        } else {
+          console.log('Img API NOT STORED');
+          this.fetchImgAPI().bind(newThis);
+        }
+      })
+      .catch((error) => console.log(error));
+
   }
 }
 
